@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cryodecoder"
+version= "0.0.1dev"
+authors = [
+    {name = "Paul Biggs"},
+    {name = "Jono Hawkins", email = "hawkinsj22@cardiff.ac.uk"},
+    {name = "Mike Prior-Jones", email="prior-jonesm@cardiff.ac.uk"}   
+]
+description = "Module to read packets from various Cryo* instruments"
+readme = "README.md"
+requires-python = ">=3.8" 
+dependencies = [
+    # TODO 
+]
+# keywords = ["TODO1", "TODO2"]
