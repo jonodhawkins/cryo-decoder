@@ -5,6 +5,7 @@ import cryodecoder
 # Define valid data types
 ##############################################################################
 VALID_CRYOEGG_DATA = b'\xA0\x0F\x03\x04\xF3\x3F\x45\x59\xAC\x0F\x00'
+VALID_CRYOWURST_DATA = b'\x00\xf5\xfe\xfe\x02\x06\xfe\x96\xff\xf4\x00\x1e\xfc\x1a\xff\xfa\x00\x11\x032\x00\x00\r\xdf\x07'
 VALID_MBUSPACKET_DATA = b'\x44\x24\x48\x02\x00\x24\xCE\x01\x07\xAA\xAA\x0F\x03\x04\xF2\x3F\xF2\x56\x8C\x0F\x19\x5A'
 VALID_MBUSPACKET_DATA_CONSTRUCTED = \
     b'\x44\x24\x48\x02\x00\x24\xCE\x01\x07\xAA' + VALID_CRYOEGG_DATA + b'\x5A'
@@ -26,6 +27,32 @@ def test_cryoeggpacket_dummy():
 
     assert packet.raw == VALID_CRYOEGG_DATA
     assert len(packet) == len(VALID_CRYOEGG_DATA)
+
+def test_cryoeggpacket_invalid_length():
+
+    # Test undersized
+    with pytest.raises(ValueError):
+        packet = cryodecoder.CryoeggPacket(VALID_CRYOEGG_DATA[0:-1])
+    
+    # Test oversized
+    with pytest.raises(ValueError):
+        packet = cryodecoder.CryoeggPacket(VALID_CRYOEGG_DATA + b'\x00')
+
+def test_cryowrustpacket_real():
+
+    packet = cryodecoder.CryowurstPacket(VALID_CRYOWURST_DATA)
+
+    assert packet.sequence_number == 7
+
+def test_cryowurstpacket_invalid_length():
+
+    # Test undersized
+    with pytest.raises(ValueError):
+        packet = cryodecoder.CryowurstPacket(VALID_CRYOWURST_DATA[0:-1])
+    
+    # Test oversized
+    with pytest.raises(ValueError):
+        packet = cryodecoder.CryowurstPacket(VALID_CRYOWURST_DATA + b'\x00')
 
 def test_mbuspacket_dummy():
 
@@ -68,3 +95,20 @@ def test_cryoreceiverpacket_dummy():
     assert packet.channel == 1
     assert packet.pressure_logger == 10060
     assert packet.solar_voltage == 12000
+    
+def test_sdsatellitereceiverpacket_real():
+
+    sd_packet_data = bytes.fromhex("5731b5a4d7644abf4241fb0d5b44810c0124440102010020cf0107ac00f5fefe0206fe96fff4001efc1afffa0011033200000ddf078e")
+
+    packet = cryodecoder.SDSatellitePacket(sd_packet_data)
+
+    assert isinstance(packet.mbus_packet, cryodecoder.MBusPacket)
+    assert isinstance(packet.mbus_packet.payload, cryodecoder.CryowurstPacket)
+    assert packet.mbus_packet.user_id == 0xCF200001
+    
+def test_sdsatellitereceiverpacket_badlength():
+
+    long_sd_packet_data = bytes.fromhex("573184aad764b82c4a41a4025b44920c0124440300020020cf0107ac010c005f01320040002d00e5fc35001a0084047d00000dc8fe9e573184aad764b82c4a41a4025b44920c0224440300020020cf0107ac010c005f01320040002d00e5fc35001a0084047d00000dc8fe94")
+
+    with pytest.raises(ValueError, match=r"Raw packet length .*") as e_info:
+        packet = cryodecoder.SDSatellitePacket(long_sd_packet_data)

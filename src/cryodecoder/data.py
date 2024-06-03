@@ -60,6 +60,84 @@ class CryoeggData(Data):
     def parse_sequence_number(raw, _):
         return raw
     
+class CryowurstData(Data):
+
+    ACCELEROMETER_FULL_SCALE_DEFAULT = 2 # g
+    MAGNETOMETER_FULL_SCALE_DEFAULT = 4912 # uT
+
+    def __init__(self, packet, accelerometer_full_scale = None, magnetometer_full_scale = None):
+        super().__init__(packet)
+
+        self.accelerometer_full_scale = accelerometer_full_scale or CryowurstData.ACCELEROMETER_FULL_SCALE_DEFAULT
+        self.magnetometer_full_scale = magnetometer_full_scale or CryowurstData.MAGNETOMETER_FULL_SCALE_DEFAULT
+
+        self.convert()
+
+    @staticmethod
+    def parse_temperature(raw, _):
+        # For TMP117 sensor, multiple returned value by 7.8125mC
+        return float(raw) * 0.0078125 # degC
+    
+    @staticmethod
+    def __magnetometer_icm_20948(raw, self):
+        if raw > 32752 or raw < -32752:
+            raise ValueError("Invalid raw magnetometer value outside [-32752,32752] range.")
+        else:
+            return float(raw) / 32752 * self.accelerometer_full_scale # uT
+
+    @staticmethod
+    def parse_magnetometer_x(raw, self):
+        return CryowurstData.__magnetometer_icm_20948(raw, self)
+    
+    @staticmethod
+    def parse_magnetometer_y(raw, self):
+        return CryowurstData.__magnetometer_icm_20948(raw, self)
+    
+    @staticmethod
+    def parse_magnetometer_z(raw, self):
+        return CryowurstData.__magnetometer_icm_20948(raw, self)
+    
+    @staticmethod
+    def __accelerometer_tilt05(raw, _):
+        # For TILT-05 convert the accelerometer data from mg to g
+        return float(raw) / 1000
+
+    @staticmethod
+    def __accelerometer(raw, self):
+        # TODO: Switch behaviour based on which accelerometer was used
+        return CryowurstData.__accelerometer_tilt05(raw, self)
+    
+    @staticmethod
+    def parse_accelerometer_x(raw, self):
+        return CryowurstData.__accelerometer(raw, self)
+    
+    @staticmethod
+    def parse_accelerometer_y(raw, self):
+        return CryowurstData.__accelerometer(raw, self)
+    
+    @staticmethod
+    def parse_accelerometer_z(raw, self):
+        return CryowurstData.__accelerometer(raw, self)
+    
+    @staticmethod
+    def parse_pitch_x(raw, self):
+        raise NotImplementedError
+    
+    @staticmethod
+    def parse_roll_y(raw, self):
+        raise NotImplementedError
+    
+    @staticmethod
+    def parse_conductivity(raw, self):
+        raise NotImplementedError
+    
+    @staticmethod
+    def parse_pressure_sensor(raw, self):
+        raise NotImplementedError
+
+    @staticmethod
+    def parse_battery_voltage(raw, self):
+        raise NotImplementedError
 
 class CryoReceiverData(Data):
     

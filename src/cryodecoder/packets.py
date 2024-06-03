@@ -53,6 +53,9 @@ class CryoeggPacket(Packet):
     def __init__(self, *args, **kwargs):
         # Call super class constructor
         Packet.__init__(self, *args, **kwargs)
+        # Validate packet length
+        if len(self.raw) != self.__class__.MIN_SIZE:
+            raise ValueError(f"Invalid packet length ({len(self.raw)}), expecting {self.__class__.MIN_SIZE}")
 
     @staticmethod
     def parse_conductivity(raw):
@@ -83,6 +86,9 @@ class HydrobeanPacket(Packet):
 
     def __init__(self, *args, **kwargs):
         Packet.__init__(self, *args, **kwargs)
+        # Validate packet length
+        if len(self.raw) != self.__class__.MIN_SIZE:
+            raise ValueError(f"Invalid packet length ({len(self.raw)}), expecting {self.__class__.MIN_SIZE}")
 
     @staticmethod
     def parse_conductivity(raw):
@@ -108,6 +114,9 @@ class CryowurstPacket(Packet):
 
     def __init__(self, *args, **kwargs):
         Packet.__init__(self, *args, **kwargs)
+        # Validate packet length
+        if len(self.raw) != self.__class__.MIN_SIZE:
+            raise ValueError(f"Invalid packet length ({len(self.raw)}), expecting {self.__class__.MIN_SIZE}")
 
     @staticmethod
     def parse_conductivity(raw):
@@ -194,7 +203,11 @@ class CryoReceiverPacket(Packet):
 class SDSatellitePacket(Packet):
 
     def __init__(self, *args, **kwargs):
+        #
         Packet.__init__(self, *args, **kwargs)
+        # Validate packet length
+        if len(self.raw) > self.__class__.MIN_SIZE + self.length:
+            raise ValueError(f"Raw packet length ({len(self.raw)}) exceeds expected length {self.__class__.MIN_SIZE + self.length}")
 
     @staticmethod
     def parse_header(raw):
@@ -224,7 +237,7 @@ class SDSatellitePacket(Packet):
     @staticmethod
     def parse_length(raw):
         return int.from_bytes(raw, byteorder="little")
-    
+        
     @staticmethod
     def parse_mbus_packet(raw):
         return CryoReceiverPacket.parse_mbus_packet(raw)
