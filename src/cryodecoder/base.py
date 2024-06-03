@@ -1,5 +1,11 @@
 from abc import ABC, abstractmethod
-import tomllib
+
+import sys
+
+if sys.version_info <= (3,11):
+    import toml as tomllib
+else:
+    import tomllib
 
 
 ##############################################################################
@@ -210,8 +216,14 @@ class PacketConfig:
                 self.fields[field] = temp_parameters
 
 def load_packet_config(path):
-    with open(path, "rb") as config_fh:
-        return tomllib.load(config_fh)
+        if sys.version_info <= (3,11):
+            # Load string
+            with open(path, "r") as config_fh:
+                toml_file = config_fh.read()
+                return tomllib.loads(toml_file)
+        else:  
+            with open(path, "rb") as config_fh:
+                return tomllib.load(config_fh)
 
 ##############################################################################
 # DATA

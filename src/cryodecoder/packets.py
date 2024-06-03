@@ -9,7 +9,7 @@ class MBusPacket(Packet):
 
     @staticmethod
     def parse_cfield(raw):
-        return int.from_bytes(raw)
+        return int.from_bytes(raw, byteorder="little")
     
     @staticmethod
     def parse_m_id(raw):
@@ -21,19 +21,19 @@ class MBusPacket(Packet):
     
     @staticmethod
     def parse_version(raw):
-        return int.from_bytes(raw)
+        return int.from_bytes(raw, byteorder="little")
     
     @staticmethod
     def parse_dev(raw):
-        return int.from_bytes(raw)
+        return int.from_bytes(raw, byteorder="little")
     
     @staticmethod
     def parse_control_field(raw):
-        return int.from_bytes(raw)
+        return int.from_bytes(raw, byteorder="little")
     
     @staticmethod
     def parse_rssi(raw):
-        return int.from_bytes(raw, signed=True)
+        return int.from_bytes(raw, byteorder="little", signed=True)
     
     @staticmethod
     def parse_payload(raw):
@@ -77,7 +77,7 @@ class CryoeggPacket(Packet):
 
     @staticmethod
     def parse_sequence_number(raw):
-        return int.from_bytes(raw)
+        return int.from_bytes(raw, byteorder="little")
     
 class HydrobeanPacket(Packet):
 
@@ -170,11 +170,11 @@ class CryoReceiverPacket(Packet):
 
     @staticmethod
     def parse_channel(raw):
-        return int.from_bytes(raw)
+        return int.from_bytes(raw, byteorder="little")
 
     @staticmethod
     def parse_temperature_logger(raw):
-        return int.from_bytes(raw)
+        return int.from_bytes(raw, byteorder="little")
 
     @staticmethod
     def parse_pressure_logger(raw):
@@ -219,11 +219,11 @@ class SDSatellitePacket(Packet):
     
     @staticmethod
     def parse_channel(raw):
-        return int.from_bytes(raw)
+        return int.from_bytes(raw, byteorder="little")
     
     @staticmethod
     def parse_length(raw):
-        return int.from_bytes(raw)
+        return int.from_bytes(raw, byteorder="little")
     
     @staticmethod
     def parse_mbus_packet(raw):
