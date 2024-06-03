@@ -5,3 +5,5 @@ Makes sense that the workflow/use of the decoder is as follows:
 1. Create PacketReader with File/byte stream/serial
 2. Get *Packet objects
 3. Convert *Packet objects to *Data objects based on sensor settings (i.e. pressure sensor)
+
+TODO: need to do something to cope with the strange Cryoegg 25-byte packets - assuming this also happens for Cryowurst...?

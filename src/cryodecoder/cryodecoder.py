@@ -1,6 +1,11 @@
 from abc import ABC, abstractmethod
 import tomllib
 
+
+##############################################################################
+# PACKETS
+##############################################################################
+
 class InvalidPacketError(Exception):
     pass
 
@@ -31,7 +36,19 @@ class Packet:
         else:
             # TODO: fix with proper error message
             raise TypeError("Raw data must be str, bytes or bytearray")
-        
+
+        # Validate length        
+        if len(raw) < self.__class__.MIN_SIZE:
+            raise ValueError(f"Raw data should meet or exceed minimum size ({self.MIN_SIZE}) for packet type {self.__class__.__name__}")
+
+    def __eq__(self, comparator):
+        # Packets are equal if they are the same type,
+        # and the raw data is the same for both
+        if isinstance(comparator, self.__class__):
+            return self.raw == comparator.raw
+        else:
+            return False
+
     # @abstractmethod
     # All subclasses should implement the parse method to assign 
     # instance variables
@@ -195,3 +212,40 @@ class PacketConfig:
 def load_packet_config(path):
     with open(path, "rb") as config_fh:
         return tomllib.load(config_fh)
+
+##############################################################################
+# DATA
+##############################################################################
+class Data:
+    def __init__(self, packet):
+        if not isinstance(packet, Packet):
+            raise TypeError("Invalid type, should be of type Packet")
+        self.packet = packet
+
+    def get_packet(self):
+        return self.packet
+    
+    def convert(self, packet = None):
+        
+        # Unless we are explicitly converting another packet
+        # to allow stuffing of multiple data fields into one Data type 
+        # then we should use the internal packet
+        packet = packet or self.packet
+
+        # First of all, we need to inspect the fields available:
+        for field in self.packet.CONFIG.fields:
+
+            # Then for each type, we can call the Data objects parse_* method
+            # on the raw field value
+
+            field_config = self.packet.CONFIG.fields[field]
+
+            # get the raw field value (i.e. after we have sorted byte order, etc.)
+            raw_value = getattr(self.packet, field)
+
+            # get the conversion function
+            converter_function = getattr(self, field_config.parser)
+            # perform the conversion on the raw value and assign
+            setattr(self, field, converter_function(raw_value, self))
+
+##############################################################################

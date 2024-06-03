@@ -1,4 +1,5 @@
-from cryodecoder import *
+from cryodecoder import Packet
+import struct
 
 class MBusPacket(Packet):
 
@@ -36,7 +37,16 @@ class MBusPacket(Packet):
     
     @staticmethod
     def parse_payload(raw):
-        return raw
+        # Check length of payload
+        if len(raw) == CryoeggPacket.MIN_SIZE:
+            # Try and create a Cryoegg payload
+            return CryoeggPacket(raw)
+        elif len(raw) == CryowurstPacket.MIN_SIZE:
+            return CryowurstPacket(raw)
+        elif len(raw) == HydrobeanPacket.MIN_SIZE:
+            return HydrobeanPacket(raw)
+        else:
+            return raw
     
 class CryoeggPacket(Packet):
 
@@ -47,7 +57,7 @@ class CryoeggPacket(Packet):
     @staticmethod
     def parse_conductivity(raw):
         # Return voltage
-        return int.from_bytes(raw, byteorder="little") / 1000
+        return int.from_bytes(raw, byteorder="little")
 
     @staticmethod
     def parse_temperature_pt1000(raw):
@@ -63,7 +73,7 @@ class CryoeggPacket(Packet):
 
     @staticmethod
     def parse_battery_voltage(raw):
-        return int.from_bytes(raw, byteorder="little") / 1000
+        return int.from_bytes(raw, byteorder="little")
 
     @staticmethod
     def parse_sequence_number(raw):
@@ -152,3 +162,71 @@ class CryowurstPacket(Packet):
     @staticmethod
     def parse_roll_y(raw):
         return int.from_bytes(raw, byteorder="big", signed=True)
+    
+class CryoReceiverPacket(Packet):
+
+    def __init__(self, *args, **kwargs):
+        Packet.__init__(self, *args, **kwargs)
+
+    @staticmethod
+    def parse_channel(raw):
+        return int.from_bytes(raw)
+
+    @staticmethod
+    def parse_temperature_logger(raw):
+        return int.from_bytes(raw)
+
+    @staticmethod
+    def parse_pressure_logger(raw):
+        return int.from_bytes(raw, byteorder="little")
+
+    @staticmethod
+    def parse_solar_voltage(raw):
+        return int.from_bytes(raw, byteorder="little")
+
+    @staticmethod
+    def parse_mbus_packet(raw):
+        
+        # For any CryoReceiverPacket we're assuming that the
+        # payload will be an MBusPacket, hence
+        return MBusPacket(raw)
+    
+class SDSatellitePacket(Packet):
+
+    def __init__(self, *args, **kwargs):
+        Packet.__init__(self, *args, **kwargs)
+
+    @staticmethod
+    def parse_header(raw):
+        return raw.decode("ascii")
+    
+    @staticmethod
+    def parse_timestamp(raw):
+        # TODO: assuming little-endian but need to verify
+        return int.from_bytes(raw, byteorder="little")
+    
+    @staticmethod
+    def parse_temperature_logger(raw):
+        return struct.unpack("<f", raw)[0]
+    
+    @staticmethod
+    def parse_pressure_logger(raw):
+        return struct.unpack("<f", raw)[0]
+    
+    @staticmethod
+    def parse_solar_voltage(raw):
+        return int.from_bytes(raw, byteorder="little")
+    
+    @staticmethod
+    def parse_channel(raw):
+        return int.from_bytes(raw)
+    
+    @staticmethod
+    def parse_length(raw):
+        return int.from_bytes(raw)
+    
+    @staticmethod
+    def parse_mbus_packet(raw):
+        return CryoReceiverPacket.parse_mbus_packet(raw)
+    
+    

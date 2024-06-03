@@ -20,7 +20,11 @@ In the case that the lengths are not unique, should a packet be decoded:
 | 2  | 22          | MBusPacket (11), CryoeggPacket (11)                                |
 | 3  | 42          | CryoReceiverPacket (6), MBusPacket (11), CryowurstPacket (25)      |
 | 4  | 36          | MBusPacket (11), CryowurstPacket (25)                              |
-| 4  | ?           | MBusPacket (11), HydrobeanPacket (9)                               |
+| 5  | 20          | MBusPacket (11), HydrobeanPacket (9)                               |
+| 6  | 40          | SDSatellitePacket(18), MBusPacket (11), CryoeggPacket (11)         |
+| 8  | 54          | SDSatellitePacket(18), MBusPacket (11), CryowurstPacket (25)       |
+
+**Note: TODO - add description of SDSatellitePacket below**
 
 ## MBusPacket
 Minimum size is **11 bytes**, plus the size of the payload. 
@@ -42,7 +46,7 @@ Minimum size is **11 bytes**, plus the size of the payload.
 | ------------------------------------ | -------- | ------------------ |
 | Cryoegg                              | 0xAA     | CE220001 etc.      |
 | Cryowurst (with pressure sensor)     | 0xAC     | CF201001 etc.      |
-| Cryowurst (without pressure sensor)  | 0xAC     | CF201001 etc.      |
+| Cryowurst (without pressure sensor)  | 0xAC     | CF200001 etc.      |
 | Ploughmeter                          | 0xAC     | N/A                |
 | Hydrobean                            | 0xAB     | CB220001 etc.      |
 | Cryopølse                            | 0xAD     | CA220001 etc.      |

@@ -111,7 +111,7 @@
         offset = 12
         output_type = "float"
         parser = "parse_accelerometer_z"
-    [CryowurstPacket.roll_x]
+    [CryowurstPacket.pitch_x]
         offset = 14
         output_type = "float"
         parser = "parse_pitch_x"
@@ -165,4 +165,72 @@
         offset = 8
         output_type = "int"
         parser = "parse_sequence_number"
+
+[CryoReceiverPacket]
+
+    [CryoReceiverPacket.mbus_packet]
+        # Contains the repeated MBusPacket from the Radiocrafts module
+        offset = [0, -7]
+        output_type = "bytes"
+        parser = "parse_mbus_packet"
+    [CryoReceiverPacket.channel]
+        offset = -6
+        length = 1
+        output_type = "int"
+        parser = "parse_channel"
+    [CryoReceiverPacket.temperature_logger]
+        offset = -5
+        length = 1
+        output_type = "int"
+        parser = "parse_temperature_logger"
+    [CryoReceiverPacket.pressure_logger]
+        offset = [-4, -3]
+        output_type = "int"
+        parser = "parse_pressure_logger"
+    [CryoReceiverPacket.solar_voltage]
+        offset = [-2, -1]
+        output_type = "int"
+        parser = "parse_solar_voltage"
+    
+[SDSatellitePacket]
+
+    [SDSatellitePacket.header]
+    offset = 0
+    length = 2
+    output_type = "str"
+    parser = "parse_header"
+    [SDSatellitePacket.timestamp]
+    offset = 2
+    length = 4
+    output_type = "bytes"
+    parser = "parse_timestamp"
+    [SDSatellitePacket.temperature_logger]
+    offset = 6
+    length = 4
+    output_type = "float"
+    parser = "parse_temperature_logger"
+    [SDSatellitePacket.pressure_logger]
+    offset = 10
+    length = 4
+    output_type = "float"
+    parser = "parse_pressure_logger"
+    [SDSatellitePacket.solar_voltage]
+    offset = 14
+    length = 2
+    output_type = "int"
+    parser = "parse_solar_voltage"
+    [SDSatellitePacket.channel]
+    offset = 16
+    length = 1
+    output_type = "int"
+    parser = "parse_channel"
+    [SDSatellitePacket.length]
+    offset = 17
+    length = 1
+    output_type = "int"
+    parser = "parse_length"
+    [SDSatellitePacket.mbus_packet]
+    offset = [18, -1]
+    output_type = "bytes"
+    parser = "parse_mbus_packet"
     
