@@ -63,8 +63,6 @@ class Packet:
         # Store length variable locally
         length = len(self.raw)
 
-        print(f"Class name (in Config): {Packet.CONFIG[self.__class__].name}")
-
         # Iterate through fields
         for field, field_config in Packet.CONFIG[self.__class__].fields.items():
             
@@ -86,8 +84,6 @@ class Packet:
 
             # unpack indices
             start_idx, end_idx = offset_list
-
-            print(f"[{self.__class__}] Parsing {field} from {start_idx}:{end_idx} from {length} bytes.")
 
             # parse value
             parser = getattr(self.__class__, field_config.parser)
