@@ -17,7 +17,7 @@ class InvalidPacketError(Exception):
 
 class Packet:
 
-    CONFIG = None
+    CONFIG = {}
     # Define magic word class variable
     MAIGC_WORD = b'\00'
 
@@ -63,12 +63,14 @@ class Packet:
         # Store length variable locally
         length = len(self.raw)
 
+        print(f"Class name (in Config): {Packet.CONFIG[self.__class__].name}")
+
         # Iterate through fields
-        for field, field_config in self.__class__.CONFIG.fields.items():
+        for field, field_config in Packet.CONFIG[self.__class__].fields.items():
             
             # Get start and end index
             if isinstance(field_config.offset, list): 
-                offset_list = field_config.offset
+                offset_list = field_config.offset.copy()
             else:
                 if field_config.length == None:
                     raise ValueError("Length field cannot be NoneType")
@@ -85,6 +87,8 @@ class Packet:
             # unpack indices
             start_idx, end_idx = offset_list
 
+            print(f"[{self.__class__}] Parsing {field} from {start_idx}:{end_idx} from {length} bytes.")
+
             # parse value
             parser = getattr(self.__class__, field_config.parser)
             setattr(self, field, parser(self.raw[start_idx : end_idx + 1]))
@@ -92,18 +96,18 @@ class Packet:
     def __len__(self):
         return len(self.raw)
 
-    @staticmethod
-    def configure(packet_class, config_obj):
-        
+    @classmethod
+    def configure(this_class, packet_class, config_obj):
+
         # Check that a valid configuration exists
         if not packet_class.__name__ in config_obj:
             raise ValueError(f"Could not find class{config_obj} in the provided configuration file.")
         else:
             # Assign configuration to class
-            packet_class.CONFIG = \
-                PacketConfig(config_obj[packet_class.__name__])
+            this_class.CONFIG[packet_class] = \
+                PacketConfig(config_obj[packet_class.__name__], packet_class.__name__)
 
-            packet_class.MIN_SIZE = packet_class.CONFIG.length
+            packet_class.MIN_SIZE = this_class.CONFIG[packet_class].length
 
     @staticmethod
     def __validate_raw(raw):    
@@ -162,13 +166,14 @@ class PacketConfig:
         "parser"         : None
     }
 
-    def __init__(self, config_obj):
+    def __init__(self, config_obj, name):
         # Initialise default parameter array
         # - need to call dict to avoid shared reference
         self.__default_parameters = PacketConfigParameters()
         # and empty field array for packet components
         self.fields = dict()
         self.length = 0
+        self.name = name
         
         # Check that the config contains the current packet
         self.parse(config_obj)

@@ -54,6 +54,23 @@ def test_cryowurstpacket_invalid_length():
     with pytest.raises(ValueError):
         packet = cryodecoder.CryowurstPacket(VALID_CRYOWURST_DATA + b'\x00')
 
+def test_cryoreceiverpacket_dummy():
+
+    mbus_dummy_data = VALID_MBUSPACKET_DATA
+
+    # 10060 tenths of a millibar = 0x274C -> little endian 0x4C, 0x27
+    # 12000 millivolts = 0x2EE0 -> 0xE0, 0x2E
+    dummy_data = mbus_dummy_data + VALID_CRYORECEIVER_DATA
+
+    packet = cryodecoder.CryoReceiverPacket(dummy_data)
+    
+    assert isinstance(packet.mbus_packet, cryodecoder.MBusPacket)
+    assert isinstance(packet.mbus_packet.payload, cryodecoder.CryoeggPacket)
+    assert packet.temperature_logger == 0x25
+    assert packet.channel == 1
+    assert packet.pressure_logger == 10060
+    assert packet.solar_voltage == 12000
+
 def test_mbuspacket_dummy():
 
     packet = cryodecoder.MBusPacket(VALID_MBUSPACKET_DATA_CONSTRUCTED)
@@ -79,32 +96,15 @@ def test_mbuspacket_with_cryoegg():
     assert packet.rssi == 0x5A
     assert packet.payload == cryodecoder.CryoeggPacket(b'\xAA\x0F\x03\x04\xF2\x3F\xF2\x56\x8C\x0F\x19')
 
-def test_cryoreceiverpacket_dummy():
-
-    mbus_dummy_data = VALID_MBUSPACKET_DATA
-
-    # 10060 tenths of a millibar = 0x274C -> little endian 0x4C, 0x27
-    # 12000 millivolts = 0x2EE0 -> 0xE0, 0x2E
-    dummy_data = mbus_dummy_data + VALID_CRYORECEIVER_DATA
-
-    packet = cryodecoder.CryoReceiverPacket(dummy_data)
-    
-    assert isinstance(packet.mbus_packet, cryodecoder.MBusPacket)
-    assert isinstance(packet.mbus_packet.payload, cryodecoder.CryoeggPacket)
-    assert packet.temperature_logger == 0x25
-    assert packet.channel == 1
-    assert packet.pressure_logger == 10060
-    assert packet.solar_voltage == 12000
-    
 def test_sdsatellitereceiverpacket_real():
 
     sd_packet_data = bytes.fromhex("5731b5a4d7644abf4241fb0d5b44810c0124440102010020cf0107ac00f5fefe0206fe96fff4001efc1afffa0011033200000ddf078e")
 
-    packet = cryodecoder.SDSatellitePacket(sd_packet_data)
+    sd_packet = cryodecoder.SDSatellitePacket(sd_packet_data)
 
-    assert isinstance(packet.mbus_packet, cryodecoder.MBusPacket)
-    assert isinstance(packet.mbus_packet.payload, cryodecoder.CryowurstPacket)
-    assert packet.mbus_packet.user_id == 0xCF200001
+    assert isinstance(sd_packet.mbus_packet, cryodecoder.MBusPacket)
+    assert isinstance(sd_packet.mbus_packet.payload, cryodecoder.CryowurstPacket)
+    assert sd_packet.mbus_packet.user_id == 0xCF200001
     
 def test_sdsatellitereceiverpacket_badlength():
 
