@@ -64,7 +64,7 @@ class Packet:
         length = len(self.raw)
 
         # Iterate through fields
-        for field, field_config in self.CONFIG.fields.items():
+        for field, field_config in self.__class__.CONFIG.fields.items():
             
             # Get start and end index
             if isinstance(field_config.offset, list): 
@@ -74,6 +74,7 @@ class Packet:
                     raise ValueError("Length field cannot be NoneType")
                 # otherwise create a new list                
                 offset_list = [field_config.offset, field_config.offset + field_config.length - 1]
+
 
             # Correct negative values
             for i in range(len(offset_list)):
@@ -85,7 +86,7 @@ class Packet:
             start_idx, end_idx = offset_list
 
             # parse value
-            parser = getattr(self, field_config.parser)
+            parser = getattr(self.__class__, field_config.parser)
             setattr(self, field, parser(self.raw[start_idx : end_idx + 1]))
 
     def __len__(self):
@@ -143,6 +144,9 @@ class PacketConfigParameters:
             signed = self.signed,
             parser = self.parser,
         )
+    
+    def __repr__(self):
+        return f"PacketConfigParameters: offset={self.offset}, length={self.length} -> parser={self.parser}"
 
 
 class PacketConfig:

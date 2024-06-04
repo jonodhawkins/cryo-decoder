@@ -5,7 +5,7 @@ class MBusPacket(Packet):
 
     def __init__(self, *args, **kwargs):
         # Call super class constructor
-        Packet.__init__(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     @staticmethod
     def parse_cfield(raw):
@@ -52,7 +52,7 @@ class CryoeggPacket(Packet):
 
     def __init__(self, *args, **kwargs):
         # Call super class constructor
-        Packet.__init__(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)
         # Validate packet length
         if len(self.raw) != self.__class__.MIN_SIZE:
             raise ValueError(f"Invalid packet length ({len(self.raw)}), expecting {self.__class__.MIN_SIZE}")
@@ -85,7 +85,7 @@ class CryoeggPacket(Packet):
 class HydrobeanPacket(Packet):
 
     def __init__(self, *args, **kwargs):
-        Packet.__init__(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)
         # Validate packet length
         if len(self.raw) != self.__class__.MIN_SIZE:
             raise ValueError(f"Invalid packet length ({len(self.raw)}), expecting {self.__class__.MIN_SIZE}")
@@ -113,7 +113,7 @@ class HydrobeanPacket(Packet):
 class CryowurstPacket(Packet):
 
     def __init__(self, *args, **kwargs):
-        Packet.__init__(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)
         # Validate packet length
         if len(self.raw) != self.__class__.MIN_SIZE:
             raise ValueError(f"Invalid packet length ({len(self.raw)}), expecting {self.__class__.MIN_SIZE}")
@@ -175,7 +175,7 @@ class CryowurstPacket(Packet):
 class CryoReceiverPacket(Packet):
 
     def __init__(self, *args, **kwargs):
-        Packet.__init__(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     @staticmethod
     def parse_channel(raw):
@@ -204,7 +204,7 @@ class SDSatellitePacket(Packet):
 
     def __init__(self, *args, **kwargs):
         #
-        Packet.__init__(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)
         # Validate packet length
         if len(self.raw) > self.__class__.MIN_SIZE + self.length:
             raise ValueError(f"Raw packet length ({len(self.raw)}) exceeds expected length {self.__class__.MIN_SIZE + self.length}")
