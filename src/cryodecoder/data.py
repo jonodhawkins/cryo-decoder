@@ -64,12 +64,18 @@ class CryowurstData(Data):
 
     ACCELEROMETER_FULL_SCALE_DEFAULT = 2 # g
     MAGNETOMETER_FULL_SCALE_DEFAULT = 4912 # uT
+    CONDUCTIVITY_CALIBRATION_DEFAULT = lambda x : x 
+    # use a 1-to-1 mapping as a default for now 
+    # (i.e. return an invalid value in V, rather than Siemens?)
+    # - we might be able to improve this by taking a set of conductivity
+    #   calibrations across multiple CEs
 
-    def __init__(self, packet, accelerometer_full_scale = None, magnetometer_full_scale = None):
+    def __init__(self, packet, accelerometer_full_scale = None, magnetometer_full_scale = None, conductivity_calibration = None):
         super().__init__(packet)
 
         self.accelerometer_full_scale = accelerometer_full_scale or CryowurstData.ACCELEROMETER_FULL_SCALE_DEFAULT
         self.magnetometer_full_scale = magnetometer_full_scale or CryowurstData.MAGNETOMETER_FULL_SCALE_DEFAULT
+        self.conductivity_calibration = conductivity_calibration or CryoeggData.CONDUCTIVITY_CALIBRATION_DEFAULT
 
         self.convert()
 
@@ -121,26 +127,29 @@ class CryowurstData(Data):
     
     @staticmethod
     def parse_pitch_x(raw, self):
-        raise NotImplementedError
+        # convert back from 10*degrees to degrees
+        raise float(raw) / 10
     
     @staticmethod
     def parse_roll_y(raw, self):
-        raise NotImplementedError
+        # convert back from 10*degrees to degrees
+        raise float(raw) / 10
     
     @staticmethod
     def parse_conductivity(raw, self):
-        raise NotImplementedError
+        # Return calibration conductivity from voltage
+        return self.conductivity_calibration(float(raw) / 1000)
     
     @staticmethod
     def parse_pressure_sensor(raw, self):
-        raise NotImplementedError
+        # The Keller conversion is given by
+        return (raw - 16384) * (self.pressure_max - self.pressure_min) / 32768 + self.pressure_min
 
     @staticmethod
     def parse_battery_voltage(raw, self):
-        raise NotImplementedError
+        raise float(raw) / 1000
 
 class CryoReceiverData(Data):
-    
     
     def __init__(self, packet):
         # Initialise object
