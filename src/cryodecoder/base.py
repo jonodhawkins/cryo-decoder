@@ -263,6 +263,6 @@ class Data:
             # get the conversion function
             converter_function = getattr(self, field_config.parser)
             # perform the conversion on the raw value and assign
-            setattr(self, field, converter_function(raw_value, self))
+            setattr(self, field, converter_function(self, raw_value))
 
 ##############################################################################
