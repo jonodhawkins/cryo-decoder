@@ -28,3 +28,24 @@ def test_cryoeggdata_keller_pressure():
     assert data.pressure_keller_min == 0
 
     assert abs(data.pressure - 0.960) < 0.001 # correct to 1mBar? 
+
+def test_cryoeggdata_sequence_number():
+
+    packet = cryodecoder.CryoeggPacket(VALID_CRYOEGG_DATA)
+    data = cryodecoder.CryoeggData(packet)
+
+    assert data.sequence_number == 0
+
+def test_cryoeggdata_battery_voltage():
+
+    packet = cryodecoder.CryoeggPacket(VALID_CRYOEGG_DATA)
+    data = cryodecoder.CryoeggData(packet)
+
+    assert data.battery_voltage == int.from_bytes(b'\xAC\x0F', byteorder="little") / 1000
+
+def test_cryoeggdata_conductivity_calibration_default():
+
+    packet = cryodecoder.CryoeggPacket(VALID_CRYOEGG_DATA)
+    data = cryodecoder.CryoeggData(packet)
+
+    assert data.conductivity == float(int.from_bytes(b'\xA0\x0F', byteorder="little")) / 1000

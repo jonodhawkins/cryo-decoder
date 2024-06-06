@@ -64,20 +64,24 @@ class SequenceNumberData:
 class ConductivityData:
 
     # Define default conductivity calibration value
-    CONDUCTIVITY_CALIBRATION_DEFAULT = lambda x : x 
-    # use a 1-to-1 mapping as a default for now 
+    CONDUCTIVITY_CALIBRATION_DEFAULT = lambda x : float(x) / 1000 
+    # use a mV to V mapping as a default for now 
     # (i.e. return an invalid value in V, rather than Siemens?)
     # - we might be able to improve this by taking a set of conductivity
     #   calibrations across multiple CEs
 
     def __init__(self, conductivity_calibration = None, **kwargs):
 
+        if conductivity_calibration != None and not callable(conductivity_calibration):
+            raise ValueError("conductivity calibration should be a callable (function-like) object.")
+
         # Set conductivity calibration to default
         self.conductivity_calibration = conductivity_calibration or CryoeggData.CONDUCTIVITY_CALIBRATION_DEFAULT
+        
 
     def parse_conductivity(self, raw):
         # Return calibration conductivity from voltage
-        return self.conductivity_calibration(float(raw) / 1000)
+        return self.conductivity_calibration(raw)
 
 
 class CryoeggData(
