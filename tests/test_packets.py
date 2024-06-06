@@ -57,7 +57,6 @@ def test_cryowrustpacket_real():
     assert packet.battery_voltage == 0xdc6
     assert packet.sequence_number == 0xf8
 
-
 def test_cryowurstpacket_invalid_length():
 
     # Test undersized
