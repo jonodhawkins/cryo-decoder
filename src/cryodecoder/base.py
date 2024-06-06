@@ -250,12 +250,13 @@ class Data:
         packet = packet or self.packet
 
         # First of all, we need to inspect the fields available:
-        for field in self.packet.CONFIG.fields:
+        packet_config = Packet.CONFIG[packet.__class__]
+        for field in packet_config.fields:
 
             # Then for each type, we can call the Data objects parse_* method
             # on the raw field value
 
-            field_config = self.packet.CONFIG.fields[field]
+            field_config = packet_config.fields[field]
 
             # get the raw field value (i.e. after we have sorted byte order, etc.)
             raw_value = getattr(self.packet, field)
@@ -263,6 +264,6 @@ class Data:
             # get the conversion function
             converter_function = getattr(self, field_config.parser)
             # perform the conversion on the raw value and assign
-            setattr(self, field, converter_function(self, raw_value))
+            setattr(self, field, converter_function(raw_value))
 
 ##############################################################################

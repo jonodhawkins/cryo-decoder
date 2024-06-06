@@ -2,14 +2,18 @@ from cryodecoder import Data, CryoeggPacket
 
 class KellerPressureData:
     # Define default min/max pressure values
-    PRESSURE_MAX_DEFAULT = 100.00 #bar
-    PRESSURE_MIN_DEFAULT =    0.0 #bar
+    PRESSURE_MAX_DEFAULT  = 100.00 #bar
+    PRESSURE_MIN_DEFAULT  =    0.0 #bar
+    PRESSURE_TYPE_DEFAULT =    "PA" #absolute pressure + 1bar
     #
-    def __init__(self, pressure_keller_min = None, pressure_keller_max = None, keller_sensor_id = None, **kwargs):
+    def __init__(self, pressure_keller_min = None, pressure_keller_max = None, keller_sensor_id = None, pressure_type = None, atmospheric_pressure = None, **kwargs):
 
         # Assign defaults in case of no info provided
         self.pressure_keller_max = pressure_keller_max or KellerPressureData.PRESSURE_MAX_DEFAULT
         self.pressure_keller_min = pressure_keller_min or KellerPressureData.PRESSURE_MIN_DEFAULT
+        self.pressure_type = pressure_type or KellerPressureData.PRESSURE_TYPE_DEFAULT
+        self.atmospheric_pressure = atmospheric_pressure or None 
+        
         # then fallback to sensor ID (i.e. label provided by Cardiff)
         # in format:
         #   
@@ -24,14 +28,41 @@ class KellerPressureData:
         raise NotImplementedError
 
     def parse_pressure_keller(self, raw):
-        return (raw - 16384) * (self.pressure_keller_max - self.pressure_keller_min) / 32768 + self.pressure_min
+        
+        pressure = (raw - 16384) * (self.pressure_keller_max - self.pressure_keller_min) / 32768 + self.pressure_keller_min
     
+        if self.pressure_type == "PR":
+
+            if self.atmospheric_pressure == None:
+                raise ValueError("Must set atmospheric pressure if using PR sensors")
+            else:
+                return pressure + self.atmospheric_pressure
+        
+        elif self.pressure_type == "PA":
+        
+            return pressure + 1.0
+        
+        elif self.pressure_type == "PAA":
+            return pressure
+        
 class KellerTemperatureData:
 
     def parse_temperature_keller(self, raw):
         return ((raw >> 4) - 24) * 0.05 - 50
+    
+class BatteryVoltageData:
 
-class CryoeggData(Data, KellerPressureData, KellerTemperatureData):
+    def parse_battery_voltage(self, raw):
+        # Convert mV to V
+        return float(raw) / 1000
+
+class SequenceNumberData:
+
+    def parse_sequence_number(self, raw):
+        return raw
+    
+class ConductivityData:
+
     # Define default conductivity calibration value
     CONDUCTIVITY_CALIBRATION_DEFAULT = lambda x : x 
     # use a 1-to-1 mapping as a default for now 
@@ -39,39 +70,43 @@ class CryoeggData(Data, KellerPressureData, KellerTemperatureData):
     # - we might be able to improve this by taking a set of conductivity
     #   calibrations across multiple CEs
 
-    # Requires knowledge of pressure sensor to correctly define packet data
-    def __init__(self, packet, conductivity_calibration = None, **kwargs):
+    def __init__(self, conductivity_calibration = None, **kwargs):
 
-        super().__init__(packet)
+        # Set conductivity calibration to default
+        self.conductivity_calibration = conductivity_calibration or CryoeggData.CONDUCTIVITY_CALIBRATION_DEFAULT
+
+    def parse_conductivity(self, raw):
+        # Return calibration conductivity from voltage
+        return self.conductivity_calibration(float(raw) / 1000)
+
+
+class CryoeggData(
+    Data, 
+    KellerPressureData, 
+    KellerTemperatureData,
+    ConductivityData,
+    BatteryVoltageData,
+    SequenceNumberData
+):
+    # Requires knowledge of pressure sensor to correctly define packet data
+    def __init__(self, packet, **kwargs):
+        
+        Data.__init__(self, packet) 
+        KellerPressureData.__init__(self, **kwargs) 
+        KellerTemperatureData.__init__(self, **kwargs)
+        ConductivityData.__init__(self, **kwargs)
+        BatteryVoltageData.__init__(self, **kwargs)
+        SequenceNumberData.__init__(self, **kwargs)
 
         # Check we've been passed a CryoeggPacket
         if not isinstance(packet, CryoeggPacket):
             raise TypeError("Invalid packet type, packet should be of type CryoeggPacket")
 
-        # Set conductivity calibration to default
-        self.conductivity_calibration = conductivity_calibration or CryoeggData.CONDUCTIVITY_CALIBRATION_DEFAULT
-
         # Convert packet fields to values
         self.convert()
 
-    # Implement the same functions as the packet object to convert data from
-    #  raw to a usable value
-    @staticmethod
-    def parse_conductivity(self, raw):
-        # Return calibration conductivity from voltage
-        return self.conductivity_calibration(float(raw) / 1000)
-
-    @staticmethod
     def parse_temperature_pt1000(_, raw):
         # No need to do anything for the PT1000
-        return raw
-
-    @staticmethod
-    def parse_battery_voltage(_, raw):
-        return raw / 1000
-
-    @staticmethod
-    def parse_sequence_number(_, raw):
         return raw
     
 class CryowurstData(Data):
