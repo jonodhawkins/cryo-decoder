@@ -95,3 +95,78 @@ Size is **9 bytes**.
 | 4,5   | Temperature     | Integer (2-bytes, little endian) |
 | 6,7   | Battery voltage | Integer (2-bytes, little endian) |
 | 8     | Sequence number | Integer (1-byte)                 |
+
+# Syntax for `packets.toml`
+
+## `Packet` object
+Packets are used to describe the fields within a byte array so that it can be parsed.
+There are defined in the TOML file as top-level tables (i.e. `[MyPacket]`).
+They should each be associated with a Python class of the same name, which extends the `cryodecoder.Packet` class.
+
+### Parameters 
+Parameters of the packet object describe the packet and settings to be used by the parser:
+
+* `description` [`str`] - a brief description of the packet
+* `contains` [`array` of `str`] - an array of valid sub-packet names that may be contained within the packet 
+* `length` [`int`, or `array` of `int`] - valid packet length(s). 
+
+Default values for the parameters are given in the table below:
+
+| Parameter Name | Value | Description                              |
+| -------------- | ----- | ---------------------------------------- |
+| `description`  | ""    | Empty if not provided                    |
+| `contains`     | []    | Implies there are no sub-packets         |
+| `length`       | None  | Implies the packet has no maximum-length |
+
+An example of the packet parameters is given below, for a packet that has a valid length of 10-bytes and contains a `MySubPacket` within it.
+```toml
+[MyPacket]
+description = "my new packet type"
+contains = ["MySubPacket"]
+length = 10
+```
+
+
+## `Packet` fields
+Fields of the packet object are defined as TOML sub-tables (i.e. `[MyPacket.my_field]`).
+
+### Parameters
+Each field can describe the following parameters:
+
+* `description` [`str`] - a brief description of the field
+* `offset` [`int`, or `array` of `int`] - the (zero-index) offset indicating the start of the field, or a pair of values indicating the first and last byte.  Negative values can be used to describe an offset from the end of the packet (-1 is the last byte, -2 the second last, etc.).
+* `length` [`int`] - the number of bytes occupied by the field. Not used if a pair of values is given in the `offset` field.
+* `signed` [`bool`] - "true" if the numeric field is signed, or "false" if unsigned.
+* `endianness` [`str`] - "big" or "little" depending or whether the format of a multi-byte field is and integer and big or little endian.
+* `parser` [`str`] - the name of the Python method (a member of the corresponding packet class) to be used when parsing the field value.
+* `output_type` - not sure this is actually needed, would be better to replace with a more generic type field which describes the data.
+
+Default values for the fields are given in the table below.
+
+| Parameter Name | Value    | Description                                                                                            |
+| -------------- | -------- | ------------------------------------------------------------------------------------------------------ |
+| `description`  | ""       | No descripition |
+| `offset`       | None     | No meaning - all fields must have a unique offset                                                      |
+| `length`       | None     | If 'None', the length must be determined  by two offset values                                         |
+| `signed`       | False    | Assumes all integers are unsigned unless otherwise specified                                           |
+| `endianness`   | "little" | Assumes all integers are little-endian unless otherwise specified (matching SAMD21 micro-controllers). |
+| `parser`       | None     | Invalid if parser is None, an exception will be raised.                                                |
+
+Default values for each `Packet` object can be specified by defining the reserved `defaults` field. For example, the below sets default values for all fields to be signed and big-endian if they are integer types:
+
+```toml
+[MyPacket]
+[MyPacket.defaults]
+signed = True
+endianness = "big"
+[MyPacket.a_field]
+description = "a simple, big endian, signed, field"
+[MyPacket.b_field]
+signed = False
+description = "another simple, big endian, UNSIGNED field"
+```
+
+# TODO
+- Add packet metadata (i.e. description, valid lengths etc.)
+- Add description to field parameters
+- rewrite default values to be read from a subtable of each packet objects

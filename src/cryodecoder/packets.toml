@@ -1,8 +1,9 @@
 [CryoeggPacket]
     
     # Set defaults
-    length = 2
-    endianness = "little"
+    [CryoeggPacket.defaults]
+        length = 2
+        endianness = "little"
 
     [CryoeggPacket.conductivity]
         offset = 0
@@ -32,7 +33,14 @@
 
 [MBusPacket] 
 
-    endianness = "little"
+    contains = [
+        "CryoeggPacket",
+        "CryowurstPacket",
+        "HydrobeanPacket"
+    ]
+
+    [MBusPacket.defaults]
+        endianness = "little"
     
     [MBusPacket.c_field]
         offset = 0
@@ -79,9 +87,10 @@
 
 [CryowurstPacket]
 
-    endianness = "big"
-    length = 2
-    signed = true
+    [CryowurstPacket.defaults]
+        endianness = "big"
+        length = 2
+        signed = true
 
     [CryowurstPacket.temperature]
         offset = 0
@@ -143,7 +152,8 @@
 
 [HydrobeanPacket]
 
-    length = 2
+    [HydrobeanPacket.defaults]
+        length = 2
 
     [HydrobeanPacket.conductivity]
         offset = 0
@@ -167,6 +177,8 @@
         parser = "parse_sequence_number"
 
 [CryoReceiverPacket]
+
+    contains = ["MBusPacket", ]
 
     [CryoReceiverPacket.mbus_packet]
         # Contains the repeated MBusPacket from the Radiocrafts module
@@ -194,43 +206,45 @@
     
 [SDSatellitePacket]
 
+    contains = ["MBusPacket",]
+
     [SDSatellitePacket.header]
-    offset = 0
-    length = 2
-    output_type = "str"
-    parser = "parse_header"
+        offset = 0
+        length = 2
+        output_type = "str"
+        parser = "parse_header"
     [SDSatellitePacket.timestamp]
-    offset = 2
-    length = 4
-    output_type = "bytes"
-    parser = "parse_timestamp"
+        offset = 2
+        length = 4
+        output_type = "bytes"
+        parser = "parse_timestamp"
     [SDSatellitePacket.temperature_logger]
-    offset = 6
-    length = 4
-    output_type = "float"
-    parser = "parse_temperature_logger"
+        offset = 6
+        length = 4
+        output_type = "float"
+        parser = "parse_temperature_logger"
     [SDSatellitePacket.pressure_logger]
-    offset = 10
-    length = 4
-    output_type = "float"
-    parser = "parse_pressure_logger"
+        offset = 10
+        length = 4
+        output_type = "float"
+        parser = "parse_pressure_logger"
     [SDSatellitePacket.solar_voltage]
-    offset = 14
-    length = 2
-    output_type = "int"
-    parser = "parse_solar_voltage"
+        offset = 14
+        length = 2
+        output_type = "int"
+        parser = "parse_solar_voltage"
     [SDSatellitePacket.channel]
-    offset = 16
-    length = 1
-    output_type = "int"
-    parser = "parse_channel"
+        offset = 16
+        length = 1
+        output_type = "int"
+        parser = "parse_channel"
     [SDSatellitePacket.length]
-    offset = 17
-    length = 1
-    output_type = "int"
-    parser = "parse_length"
+        offset = 17
+        length = 1
+        output_type = "int"
+        parser = "parse_length"
     [SDSatellitePacket.mbus_packet]
-    offset = [18, -1]
-    output_type = "bytes"
-    parser = "parse_mbus_packet"
+        offset = [18, -1]
+        output_type = "bytes"
+        parser = "parse_mbus_packet"
     
