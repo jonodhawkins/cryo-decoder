@@ -19,3 +19,6 @@ dependencies = [
     "toml; python_version<'3.11'" 
 ]
 # keywords = ["TODO1", "TODO2"]
+
+[project.scripts]
+seriallogger = "cryodecoder.serial:serial_decoder_cli_entry"
