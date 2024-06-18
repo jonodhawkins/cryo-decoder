@@ -1,11 +1,12 @@
-from cryodecoder import Packet
+from cryodecoder import Packet, InvalidPacketError
 import struct
 
 class MBusPacket(Packet):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, raw, allow_any_payload = False, *args, **kwargs):
         # Call super class constructor
-        super().__init__(*args, **kwargs)
+        self.allow_any_payload = allow_any_payload
+        super().__init__(raw, *args, **kwargs)
 
     def parse_cfield(self, raw):
         return int.from_bytes(raw, byteorder="little")
@@ -26,7 +27,7 @@ class MBusPacket(Packet):
         return int.from_bytes(raw, byteorder="little")
     
     def parse_rssi(self, raw):
-        return int.from_bytes(raw, byteorder="little", signed=True)
+        return -int.from_bytes(raw, byteorder="little") / 2
     
     def parse_payload(self, raw):
         # Check length of payload
@@ -37,17 +38,29 @@ class MBusPacket(Packet):
             return CryowurstPacket(raw)
         elif len(raw) == HydrobeanPacket.MIN_SIZE:
             return HydrobeanPacket(raw)
-        else:
+        elif self.allow_any_payload:
             return raw
+        else:
+            raise InvalidPacketError("allow_any_payload must be enabled for raw MBusPacket payloads")
     
+    def summary(self):
+
+        payload_summary = None
+        if self.allow_any_payload and isinstance(self.payload, (bytes, bytearray)):
+            payload_summary = "".join([f"{byte:02x}" for byte in self.payload])
+        else:
+            payload_summary = self.payload.summary() if hasattr(self.payload, "summary") else "".join([f"{byte:02x}" for byte in self.payload.raw])
+
+        return f"MBusPacket ({self.user_id:x} @ {self.rssi} dBm): {payload_summary}"
+
 class CryoeggPacket(Packet):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, raw, *args, **kwargs):
         # Call super class constructor
-        super().__init__(*args, **kwargs)
+        super().__init__(raw, *args, **kwargs)
         # Validate packet length
         if len(self.raw) != self.__class__.MIN_SIZE:
-            raise ValueError(f"Invalid packet length ({len(self.raw)}), expecting {self.__class__.MIN_SIZE}")
+            raise InvalidPacketError(f"Invalid packet length ({len(self.raw)}), expecting {self.__class__.MIN_SIZE}")
 
     def parse_conductivity(self, raw):
         # Return voltage
@@ -68,36 +81,39 @@ class CryoeggPacket(Packet):
     def parse_sequence_number(_, raw):
         return int.from_bytes(raw, byteorder="little")
     
+    
+
+
 class HydrobeanPacket(Packet):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, raw, *args, **kwargs):
+        super().__init__(raw, *args, **kwargs)
         # Validate packet length
         if len(self.raw) != self.__class__.MIN_SIZE:
-            raise ValueError(f"Invalid packet length ({len(self.raw)}), expecting {self.__class__.MIN_SIZE}")
+            raise InvalidPacketError(f"Invalid packet length ({len(self.raw)}), expecting {self.__class__.MIN_SIZE}")
 
     def parse_conductivity(self, raw):
-        return CryoeggPacket.parse_conductivity(raw)
+        return CryoeggPacket.parse_conductivity(self, raw)
     
     def parse_pressure_keller(self, raw):
-        return CryoeggPacket.parse_pressure_keller(raw)
+        return CryoeggPacket.parse_pressure_keller(self, raw)
     
     def parse_temperature_keller(self, raw):
-        return CryoeggPacket.parse_temperature_keller(raw)
+        return CryoeggPacket.parse_temperature_keller(self, raw)
     
     def parse_battery_voltage(self, raw):
-        return CryoeggPacket.parse_battery_voltage(raw)
+        return CryoeggPacket.parse_battery_voltage(self, raw)
     
     def parse_sequence_number(_, raw):
         return CryoeggPacket.parse_sequence_number(_, raw)
     
 class CryowurstPacket(Packet):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, raw, *args, **kwargs):
+        super().__init__(raw, *args, **kwargs)
         # Validate packet length
         if len(self.raw) != self.__class__.MIN_SIZE:
-            raise ValueError(f"Invalid packet length ({len(self.raw)}), expecting {self.__class__.MIN_SIZE}")
+            raise InvalidPacketError(f"Invalid packet length ({len(self.raw)}), expecting {self.__class__.MIN_SIZE}")
 
     def parse_conductivity(self, raw):
         return int.from_bytes(raw, byteorder="big")
@@ -142,8 +158,8 @@ class CryowurstPacket(Packet):
     
 class CryoReceiverPacket(Packet):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, raw, *args, **kwargs):
+        super().__init__(raw, *args, **kwargs)
 
     def parse_channel(self, raw):
         return int.from_bytes(raw, byteorder="little")
@@ -165,9 +181,9 @@ class CryoReceiverPacket(Packet):
     
 class SDSatellitePacket(Packet):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, raw, *args, **kwargs):
         #
-        super().__init__(*args, **kwargs)
+        super().__init__(raw, *args, **kwargs)
         # Validate packet length
         if len(self.raw) > self.__class__.MIN_SIZE + self.length:
             raise ValueError(f"Raw packet length ({len(self.raw)}) exceeds expected length {self.__class__.MIN_SIZE + self.length}")

@@ -21,7 +21,7 @@ class Packet:
     # Define magic word class variable
     MAIGC_WORD = b'\00'
 
-    def __init__(self, raw = None, encoding = "utf-8"):
+    def __init__(self, raw, encoding = "utf-8"):
 
         # Define common instance variables for Packet
         if raw != None:
@@ -31,7 +31,7 @@ class Packet:
 
     def set_raw_data(self, raw = None, encoding = "utf-8"):
         # Validate packet
-        Packet.__validate_raw(raw)
+        self.__validate_raw(raw)
         # and then assign data
         if isinstance(raw, str):
             self.raw = bytearray(raw, encoding)
@@ -45,7 +45,7 @@ class Packet:
 
         # Validate length        
         if len(raw) < self.__class__.MIN_SIZE:
-            raise ValueError(f"Raw data should meet or exceed minimum size ({self.MIN_SIZE}) for packet type {self.__class__.__name__}")
+            raise InvalidPacketError(f"Raw data should meet or exceed minimum size ({self.MIN_SIZE}) for packet type {self.__class__.__name__}")
 
     def __eq__(self, comparator):
         # Packets are equal if they are the same type,
@@ -105,8 +105,7 @@ class Packet:
 
             packet_class.MIN_SIZE = this_class.CONFIG[packet_class].length
 
-    @staticmethod
-    def __validate_raw(raw):    
+    def __validate_raw(self, raw):    
         if not isinstance(raw, (str, bytes, bytearray)):
             raise TypeError("Raw data should be of type 'str', 'bytes' or 'bytearray'")
         

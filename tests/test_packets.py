@@ -32,11 +32,11 @@ def test_cryoeggpacket_dummy():
 def test_cryoeggpacket_invalid_length():
 
     # Test undersized
-    with pytest.raises(ValueError):
+    with pytest.raises(cryodecoder.InvalidPacketError):
         packet = cryodecoder.CryoeggPacket(VALID_CRYOEGG_DATA[0:-1])
     
     # Test oversized
-    with pytest.raises(ValueError):
+    with pytest.raises(cryodecoder.InvalidPacketError):
         packet = cryodecoder.CryoeggPacket(VALID_CRYOEGG_DATA + b'\x00')
 
 def test_cryowrustpacket_real():
@@ -60,11 +60,11 @@ def test_cryowrustpacket_real():
 def test_cryowurstpacket_invalid_length():
 
     # Test undersized
-    with pytest.raises(ValueError):
+    with pytest.raises(cryodecoder.InvalidPacketError):
         packet = cryodecoder.CryowurstPacket(VALID_CRYOWURST_DATA[0:-1])
     
     # Test oversized
-    with pytest.raises(ValueError):
+    with pytest.raises(cryodecoder.InvalidPacketError):
         packet = cryodecoder.CryowurstPacket(VALID_CRYOWURST_DATA + b'\x00')
 
 def test_mbuspacket_dummy():
@@ -123,5 +123,5 @@ def test_sdsatellitereceiverpacket_badlength():
 
     long_sd_packet_data = bytes.fromhex("573184aad764b82c4a41a4025b44920c0124440300020020cf0107ac010c005f01320040002d00e5fc35001a0084047d00000dc8fe9e573184aad764b82c4a41a4025b44920c0224440300020020cf0107ac010c005f01320040002d00e5fc35001a0084047d00000dc8fe94")
 
-    with pytest.raises(ValueError, match=r"Raw packet length .*") as e_info:
+    with pytest.raises(cryodecoder.InvalidPacketError) as e_info:
         packet = cryodecoder.SDSatellitePacket(long_sd_packet_data)
