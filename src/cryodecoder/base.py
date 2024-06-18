@@ -87,7 +87,7 @@ class Packet:
 
             # parse value
             parser = getattr(self.__class__, field_config.parser)
-            setattr(self, field, parser(self.raw[start_idx : end_idx + 1]))
+            setattr(self, field, parser(self, self.raw[start_idx : end_idx + 1]))
 
     def __len__(self):
         return len(self.raw)
