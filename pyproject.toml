@@ -8,6 +8,7 @@ version= "0.0.1dev"
 authors = [
     {name = "Paul Biggs"},
     {name = "Jono Hawkins", email = "hawkinsj22@cardiff.ac.uk"},
+    {name = "Lisa Craw", email = "crawl@cardiff.ac.uk"},
     {name = "Mike Prior-Jones", email="prior-jonesm@cardiff.ac.uk"}   
 ]
 description = "Module to read packets from various Cryo* instruments"
