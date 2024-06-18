@@ -14,6 +14,7 @@ description = "Module to read packets from various Cryo* instruments"
 readme = "README.md"
 requires-python = ">=3.8" 
 dependencies = [
-    # TODO 
+    # toml if < 3.11
+    "toml; python_version<'3.11'" 
 ]
 # keywords = ["TODO1", "TODO2"]
