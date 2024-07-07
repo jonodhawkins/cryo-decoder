@@ -22,3 +22,4 @@ dependencies = [
 
 [project.scripts]
 seriallogger = "cryodecoder.serial:serial_decoder_cli_entry"
+cryoeggsddecoder = "cryodecoder.file:read_cryoegg_sd_file_cli"
