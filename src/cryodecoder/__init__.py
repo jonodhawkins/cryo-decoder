@@ -2,6 +2,7 @@
 from .base import *
 from .packets import *
 from .data import *
+from .file import read_cryoegg_sd_file
 
 from importlib.resources import files, as_file
 

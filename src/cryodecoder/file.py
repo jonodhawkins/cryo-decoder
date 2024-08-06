@@ -30,12 +30,29 @@ def read_cryoegg_sd_file(input_file, output_file="sd_output.csv", pressure_max=3
                 "voltage"
         )) + "\n")
 
-        while True:
+        reading_file = True
+        while reading_file:
+                
+            buffer = [None, None]
+            # C = 67, I = 73 - is this valid for CryoWurst packets too?
+            # No - they begin with W which is W = 87 - need to make change for cryowurst verison
+            # while (buffer[0] != 67 and buffer[1] != 73):
+            while (not (buffer[0] == 67 and buffer[1] == 49)):
+                buffer = input_handle.read(2)
+                if len(buffer) != 2:
+                    print("Quitting, EOF")
+                    reading_file = False  
+                    break
+            
+            print(f"Found packet at {input_handle.tell()-2}")
+            input_handle.seek(input_handle.tell() - 2)
+
             # We should know that these are RockBlock/SD output packets?
             data_raw = input_handle.read(total_size)
 
             if len(data_raw) < total_size:
                 print(f"Quitting, no more data")
+                reading_file = False
                 break
 
             # Create SDSatellitePacket

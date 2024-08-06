@@ -16,7 +16,9 @@ readme = "README.md"
 requires-python = ">=3.8" 
 dependencies = [
     # toml if < 3.11
-    "toml; python_version<'3.11'" 
+    "toml; python_version<'3.11'",
+    "pyserial",
+    "pytest" 
 ]
 # keywords = ["TODO1", "TODO2"]
 
