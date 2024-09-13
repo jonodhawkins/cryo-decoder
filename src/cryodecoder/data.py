@@ -139,13 +139,13 @@ class CTiTilt05AccelerometerData:
         # For TILT-05 convert the accelerometer data from mg to g
         return float(raw) / 1000
     
-    def parse_accelerometer_x(self, raw):
+    def parse_tilt_accelerometer_x(self, raw):
         return self.__accelerometer_tilt05(raw)
     
-    def parse_accelerometer_y(self, raw):
+    def parse_tilt_accelerometer_y(self, raw):
         return self.__accelerometer_tilt05(raw)
     
-    def parse_accelerometer_z(self, raw):
+    def parse_tilt_accelerometer_z(self, raw):
         return self.__accelerometer_tilt05(raw)
 
 class CTiTilt05OrientationData:
@@ -161,6 +161,20 @@ class CTiTilt05OrientationData:
         # convert back from 10*degrees to degrees
         return float(raw) / 10
     
+class IMUAccelerometerData:
+
+    def __init__(self, **kwargs):
+        pass
+
+    def parse_imu_accelerometer_x(self, raw):
+        return float(raw)*(1000/16384)
+
+    def parse_imu_accelerometer_y(self, raw):
+        return float(raw)*(1000/16384)
+
+    def parse_imu_accelerometer_z(self, raw):
+        return float(raw)*(1000/16384)
+
 ##############################################################################
 # CRYOEGG
 ##############################################################################
@@ -204,6 +218,7 @@ class CryowurstData(
     ICM20948MagnetometerData,
     CTiTilt05AccelerometerData,
     CTiTilt05OrientationData,
+    IMUAccelerometerData,
     TMP117TemperatureData,
     ConductivityData,
     BatteryVoltageData,

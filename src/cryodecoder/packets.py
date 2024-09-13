@@ -109,8 +109,9 @@ class HydrobeanPacket(Packet):
     @staticmethod
     def parse_sequence_number(raw):
         return CryoeggPacket.parse_sequence_number(raw)
-    
-class CryowurstPacket(Packet):
+
+# format used for cryowurst 2023 field season    
+class Cryowurst2023Packet(Packet):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -153,15 +154,15 @@ class CryowurstPacket(Packet):
         return int.from_bytes(raw, byteorder="big", signed=True)
     
     @staticmethod
-    def parse_accelerometer_x(raw):
+    def parse_tilt_accelerometer_x(raw):
         return int.from_bytes(raw, byteorder="big", signed=True)
     
     @staticmethod
-    def parse_accelerometer_y(raw):
+    def parse_tilt_accelerometer_y(raw):
         return int.from_bytes(raw, byteorder="big", signed=True)
     
     @staticmethod
-    def parse_accelerometer_z(raw):
+    def parse_tilt_accelerometer_z(raw):
         return int.from_bytes(raw, byteorder="big", signed=True)
     
     @staticmethod
@@ -171,6 +172,85 @@ class CryowurstPacket(Packet):
     @staticmethod
     def parse_roll_y(raw):
         return int.from_bytes(raw, byteorder="big", signed=True)
+
+# Format used for cryowurst 2024 field season onward
+class CryowurstPacket(Packet):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Validate packet length
+        if len(self.raw) != self.__class__.MIN_SIZE:
+            raise ValueError(f"Invalid packet length ({len(self.raw)}), expecting {self.__class__.MIN_SIZE}")
+
+    @staticmethod
+    def parse_conductivity(raw):
+        return int.from_bytes(raw, byteorder="little")
+    
+    @staticmethod
+    def parse_pressure_keller(raw):
+        return int.from_bytes(raw, byteorder="little")
+    
+    @staticmethod
+    def parse_temperature_keller(raw):
+        return int.from_bytes(raw, byteorder="little")
+    
+    @staticmethod
+    def parse_battery_voltage(raw):
+        return int.from_bytes(raw, byteorder="little", signed=True)
+    
+    @staticmethod
+    def parse_sequence_number(raw):
+        return CryoeggPacket.parse_sequence_number(raw)
+    
+    # ------------
+    @staticmethod
+    def parse_temperature_tmp117(raw):
+        return int.from_bytes(raw, byteorder="little", signed=True)
+        # save for later * 7.8125 / 1000
+
+    @staticmethod
+    def parse_magnetometer_x(raw):
+        return int.from_bytes(raw, byteorder="little", signed=True)
+    
+    @staticmethod
+    def parse_magnetometer_y(raw):
+        return int.from_bytes(raw, byteorder="little", signed=True)
+    
+    @staticmethod
+    def parse_magnetometer_z(raw):
+        return int.from_bytes(raw, byteorder="little", signed=True)
+    
+    @staticmethod
+    def parse_imu_accelerometer_x(raw):
+        return int.from_bytes(raw, byteorder="little", signed=True)
+    
+    @staticmethod
+    def parse_imu_accelerometer_y(raw):
+        return int.from_bytes(raw, byteorder="little", signed=True)
+    
+    @staticmethod
+    def parse_imu_accelerometer_z(raw):
+        return int.from_bytes(raw, byteorder="little", signed=True)
+    
+    @staticmethod
+    def parse_tilt_accelerometer_x(raw):
+        return int.from_bytes(raw, byteorder="little", signed=True)
+    
+    @staticmethod
+    def parse_tilt_accelerometer_y(raw):
+        return int.from_bytes(raw, byteorder="little", signed=True)
+    
+    @staticmethod
+    def parse_tilt_accelerometer_z(raw):
+        return int.from_bytes(raw, byteorder="little", signed=True)
+
+    @staticmethod
+    def parse_pitch_x(raw):
+        return int.from_bytes(raw, byteorder="little", signed=True)
+    
+    @staticmethod
+    def parse_roll_y(raw):
+        return int.from_bytes(raw, byteorder="little", signed=True)
     
 class CryoReceiverPacket(Packet):
 

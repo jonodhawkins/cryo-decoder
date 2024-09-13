@@ -77,9 +77,73 @@
         output_type = "bytes"
         parser = "parse_payload"
 
-[CryowurstPacket]
+[Cryowurst2023Packet]
 
     endianness = "big"
+    length = 2
+    signed = true
+
+    [Cryowurst2023Packet.temperature]
+        offset = 0
+        output_type = "float"
+        parser = "parse_temperature_tmp117"
+    [Cryowurst2023Packet.magnetometer_x]
+        offset = 2
+        output_type = "float"
+        parser = "parse_magnetometer_x"
+    [Cryowurst2023Packet.magnetometer_y]
+        offset = 4
+        output_type = "float"
+        parser = "parse_magnetometer_y"
+    [Cryowurst2023Packet.magnetometer_z]
+        offset = 6
+        output_type = "float"
+        parser = "parse_magnetometer_z"
+    [Cryowurst2023Packet.accelerometer_x]
+        offset = 8
+        output_type = "float"
+        parser = "parse_tilt_accelerometer_x"
+    [Cryowurst2023Packet.accelerometer_y]
+        offset = 10
+        output_type = "float"
+        parser = "parse_tilt_accelerometer_y"
+    [Cryowurst2023Packet.accelerometer_z]
+        offset = 12
+        output_type = "float"
+        parser = "parse_tilt_accelerometer_z"
+    [Cryowurst2023Packet.pitch_x]
+        offset = 14
+        output_type = "float"
+        parser = "parse_pitch_x"
+    [Cryowurst2023Packet.roll_y]
+        offset = 16
+        output_type = "float"
+        parser = "parse_roll_y"
+    [Cryowurst2023Packet.conductivity]
+        offset = 18
+        output_type = "float"
+        parser = "parse_conductivity"
+        signed = false
+    [Cryowurst2023Packet.pressure]
+        offset = 20
+        output_type = "float"
+        parser = "parse_pressure_keller"
+        signed = false
+    [Cryowurst2023Packet.battery_voltage]
+        offset = 22
+        output_type = "float"
+        signed = true 
+        parser = "parse_battery_voltage"
+    [Cryowurst2023Packet.sequence_number]
+        offset = 24
+        length = 1
+        output_type = "int"
+        signed = false
+        parser = "parse_sequence_number"
+        
+[CryowurstPacket]
+
+    endianness = "little"
     length = 2
     signed = true
 
@@ -99,43 +163,60 @@
         offset = 6
         output_type = "float"
         parser = "parse_magnetometer_z"
-    [CryowurstPacket.accelerometer_x]
+    [CryowurstPacket.imu_accelerometer_x]
         offset = 8
         output_type = "float"
-        parser = "parse_accelerometer_x"
-    [CryowurstPacket.accelerometer_y]
+        parser = "parse_imu_accelerometer_x"
+    [CryowurstPacket.imu_accelerometer_y]
         offset = 10
         output_type = "float"
-        parser = "parse_accelerometer_y"
-    [CryowurstPacket.accelerometer_z]
+        parser = "parse_imu_accelerometer_y"
+    [CryowurstPacket.imu_accelerometer_z]
         offset = 12
         output_type = "float"
-        parser = "parse_accelerometer_z"
+        parser = "parse_imu_accelerometer_z"
+    [CryowurstPacket.tilt_accelerometer_x]
+        offset = 14 
+        output_type = "float"
+        parser = "parse_tilt_accelerometer_x"
+    [CryowurstPacket.tilt_accelerometer_y]
+        offset = 16
+        output_type = "float"
+        parser = "parse_tilt_accelerometer_y"
+    [CryowurstPacket.tilt_accelerometer_z]
+        offset = 18
+        output_type = "float"
+        parser = "parse_tilt_accelerometer_z"
     [CryowurstPacket.pitch_x]
-        offset = 14
+        offset = 20 
         output_type = "float"
         parser = "parse_pitch_x"
     [CryowurstPacket.roll_y]
-        offset = 16
+        offset = 22 
         output_type = "float"
         parser = "parse_roll_y"
     [CryowurstPacket.conductivity]
-        offset = 18
+        offset = 24 
         output_type = "float"
         parser = "parse_conductivity"
         signed = false
     [CryowurstPacket.pressure]
-        offset = 20
+        offset = 26
         output_type = "float"
         parser = "parse_pressure_keller"
         signed = false
-    [CryowurstPacket.battery_voltage]
-        offset = 22
+    [CryowurstPacket.temperature_keller]
+        offset = 28
         output_type = "float"
         signed = false
+        parser = "parse_temperature_keller"
+    [CryowurstPacket.battery_voltage]
+        offset =30 
+        output_type = "float"
+        signed = true 
         parser = "parse_battery_voltage"
     [CryowurstPacket.sequence_number]
-        offset = 24
+        offset = 32 
         length = 1
         output_type = "int"
         signed = false
