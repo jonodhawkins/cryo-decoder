@@ -4,7 +4,7 @@ import argparse
 import datetime
 import pathlib
 
-def read_cryoegg_sd_file(input_file, output_file="sd_output.csv", pressure_max=3.0):
+def read_cryoegg_sd_file(input_file, output_file="sd_output.csv", pressure_max=3.0, verbose=False):
     
     # Valid packet size for CryoeggPackets only
     total_size = \
@@ -40,18 +40,21 @@ def read_cryoegg_sd_file(input_file, output_file="sd_output.csv", pressure_max=3
             while (not (buffer[0] == 67 and buffer[1] == 49)):
                 buffer = input_handle.read(2)
                 if len(buffer) != 2:
-                    print("Quitting, EOF")
+                    if verbose:
+                        print("Quitting, EOF")
                     reading_file = False  
                     break
             
-            print(f"Found packet at {input_handle.tell()-2}")
+            if verbose:
+                print(f"Found packet at {input_handle.tell()-2}")
             input_handle.seek(input_handle.tell() - 2)
 
             # We should know that these are RockBlock/SD output packets?
             data_raw = input_handle.read(total_size)
 
             if len(data_raw) < total_size:
-                print(f"Quitting, no more data")
+                if verbose:
+                    print(f"Quitting, no more data")
                 reading_file = False
                 break
 
@@ -73,9 +76,20 @@ def read_cryoegg_sd_file(input_file, output_file="sd_output.csv", pressure_max=3
             id = f"{packet.mbus_packet.user_id:x}"
 
             # Get Cryoegg data
+            egg_pressure_max = 3.0
+            if isinstance(pressure_max, dict):
+                if not id in pressure_max:
+                    raise ValueError(f"Could not find ID {id} in provided pressure_max dictionary")
+                else:
+                    egg_pressure_max = pressure_max[id]
+            elif isinstance(pressure_max, (float, int)):
+                egg_pressure_max = pressure_max 
+            else:
+                raise ValueError("Invalid type for pressure max")
+            
             cryoegg_data = cryodecoder.CryoeggData(
                 packet.mbus_packet.payload, 
-                pressure_keller_max = pressure_max
+                pressure_keller_max = egg_pressure_max
             )
 
             sequence_numbker = cryoegg_data.sequence_number
