@@ -64,7 +64,7 @@ Size is **11 bytes**.
 | 8,9   | Battery Voltage | Integer (2-bytes, little endian) |
 | 10    | Sequence Number | Integer (1-byte)                 |
  
-## CryowurstPacket (CI: 0xAC, UserID: 0xCF)
+## Cryowurst2023Packet (CI: 0xAC, UserID: 0xCF)
 Size is **25 bytes**.
 
 Packet description not include CI field. According to dataformats document (repeated above), Cryowurst should have a CI field of 0xAC.
@@ -84,6 +84,31 @@ Packet description not include CI field. According to dataformats document (repe
 | 20,21 | Pressure        | Integer (2-bytes, big endian?)   |
 | 22,23 | Battery voltage | Integer (2-bytes, big endian?)   |
 | 24    | Sequence number | Integer (1-byte)                 |
+
+## CryowurstPacket (CI: 0xAC, UserID: 0xCF)
+Size is **33 bytes**.
+
+Packet description not include CI field. According to dataformats document (repeated above), Cryowurst should have a CI field of 0xAC.
+
+| Bytes | Description     | Formatting                       |
+| ----- | --------------- | -------------------------------- |
+| 0,1   | Temperature     | Integer (2-bytes, little endian)   | 
+| 2,3   | Magnetometer X  | Integer (2-bytes, little endian)   |
+| 4,5   | Magnetometer Y  | Integer (2-bytes, little endian)   |
+| 6,7   | Magnetometer Z  | Integer (2-bytes, little endian)   |
+| 8,9   | IMU Accel. X   | Integer (2-bytes, little endian)   |
+| 10,11 | IMU Accel. Y   | Integer (2-bytes, little endian)   |
+| 12,13 | IMU Accel. Z   | Integer (2-bytes, little endian)   |
+| 14,15 | Tilt Accel. X   | Integer (2-bytes, little endian)   |
+| 16,17 | Tilt Accel. Y   | Integer (2-bytes, little endian)   |
+| 18,19 | Tilt Accel. Z   | Integer (2-bytes, little endian)   |
+| 20,21 | Tilt Pitch X    | Integer (2-bytes, little endian)   |
+| 22,23 | Tilt Roll Y     | Integer (2-bytes, little endian)   |
+| 24,25 | Conductivity    | Integer (2-bytes, little endian)   |
+| 26,27 | Pressure        | Integer (2-bytes, little endian)   |
+| 28,29 | Keller Temp     | Integer (2-bytes, little endian)   |
+| 30,31 | Battery voltage | Integer (2-bytes, little endian)   |
+| 32    | Sequence number | Integer (1-byte)                 |
 
 # HydrobeanPacket (CI: 0xAB, UserID: 0xCB)
 Size is **9 bytes**.
