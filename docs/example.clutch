@@ -1,0 +1,19 @@
+[CE240001]
+description = "Cryoegg for Tom Chudley crevasse experiments"
+keller_pressure_min = 0.0 # bar 
+keller_pressure_max = 3.0 # bar
+
+##############################################################################
+# Egg: CE240014
+##############################################################################
+["CE240014,CE240001"]
+description = "Cryoegg for Bristol experiments at SLIDE, 2024"
+keller_pressure_min =  0.0 # bar
+keller_pressure_max = 30.0 # bar
+
+# Calibration data for EC sensor on CE240014
+["CE240014,CE240001".EC]
+conductivity = [0, 2, 25, 46, 78, 115, 150, 193, 250, 292, 351, 405, 483]
+conductivity_units = "uS/cm"
+raw = [4010, 3630.142857, 1945.75, 1321.875, 814.375, 654.875, 624.5, 419, 376.625, 282.25, 231.5, 222.625, 173.625]
+raw_units = "mV"

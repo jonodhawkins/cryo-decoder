@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 
+import os
+import pathlib
 import sys
 
 if sys.version_info <= (3,11):
@@ -266,3 +268,93 @@ class Data:
             setattr(self, field, converter_function(raw_value))
 
 ##############################################################################
+# Define Clutch object to specify sensor properties
+##############################################################################
+class Clutch(ABC):
+
+    def __init__(self, file_path, fail_silently=False):
+
+        # Set fail silently flag for invalid clutch values
+        self.fail_silently = fail_silently
+        
+        if not isinstance(file_path, (os.PathLike, str, pathlib.Path)):
+            raise TypeError("Path should be string or os.PathLike object")
+        
+        # Open file
+        with open(file_path, "rb") as file_path:
+            
+            # Create empty dict for parameters object (to be loaded from the Clutch file)
+            self.parameters = dict()
+            self.__parse_toml(tomllib.load(file_path))
+
+    def find_by_id(self, id): 
+        
+        # If id is numeric, convert to hex representation
+        if isinstance(id, (int)):
+            id = f"{id:x}"
+        elif not isinstance(id, str):
+            raise TypeError("id should be of type int or str")
+
+        # Make lower case
+        id = id.lower()
+
+        # Check that the sensor deifnitions exist
+        if not id in self.parameters:
+            raise ValueError("Could not find sensor with ID {id} in clutch.")
+        
+        # Return the parsed parameters
+        return self.parameters[id]
+
+    @abstractmethod
+    def __parse_parameter(self, parameter, value):
+        pass
+    
+    def __parse_toml(self, toml_object):
+        
+        # To pick values for each sensor, we should prioritiese any value
+        # that is defined individually, i.e.
+        #
+        #   [CE240012]
+        #   my_parameter_value = 0.0
+        #
+        # would override
+        #
+        #   ["CE240012,CE240013"]
+        #   my_parameter_value = 13.9
+        #
+        # Hence here, CE240012 would take a value of 0.0, while CE240013
+        # would take a value of 13.9.
+        #
+        # To do this, we take the list of keys and then sort by the number of
+        # commas in each. Then we define an order of precedence by the number
+        # of other sensors which share characteristics.
+
+        # Create list
+        ids = list(toml_object.keys())
+        # and sort by descending number of commas
+        ids_sorted = sorted(ids, key=lambda id:id.count(","), reverse=True)
+        
+        # Iterate through top level values which correspond to sensor ID
+        for id_sorted in ids_sorted:
+            # validate parameter
+            for parameter in toml_object[id_sorted]:
+                # which will raise an exception in invalid (or not, if failing silently)
+                try:
+                    value = self.__parse_parameter(parameter, toml_object[id_sorted][parameter])
+                    
+                    # assign to each sensor with the corresponding ID
+                    for id in id_sorted.split(","):
+                        self.parameters[parameter] = value
+                
+                except Exception as e:
+                    if self.fail_silently:
+                        pass
+                    else:
+                        raise e
+                    
+                
+
+class CryoeggClutch:
+
+    def __parse_parameter(self, parameter, value):
+        pass
