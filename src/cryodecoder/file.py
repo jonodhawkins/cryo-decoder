@@ -79,7 +79,9 @@ def read_cryoegg_sd_file(input_file, output_file="sd_output.csv", pressure_max=3
             egg_pressure_max = 3.0
             if isinstance(pressure_max, dict):
                 if not id in pressure_max:
-                    raise ValueError(f"Could not find ID {id} in provided pressure_max dictionary")
+                    print(f"Skipping {id} - not in pressure_max dictionary")
+                    continue
+                    # raise ValueError(f"Could not find ID {id} in provided pressure_max dictionary")
                 else:
                     egg_pressure_max = pressure_max[id]
             elif isinstance(pressure_max, (float, int)):
